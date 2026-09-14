@@ -1,0 +1,13 @@
+{
+  "name": "assignment-1",
+  "version": "1.0.0",
+  "description": "Smart Utility Toolkit using Node.js core modules",
+  "main": "app.js",
+  "scripts": {
+    "start": "node server.js",
+    "demo": "node app.js",
+    "files": "node fileManager.js",
+    "dice": "node dice.js"
+  },
+  "license": "ISC"
+}
