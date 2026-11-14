@@ -19,7 +19,6 @@ Assignment-3/
 ├── routes/
 │   └── productRoutes.js      # Express Router with conflict-free route ordering
 ├── .env                      # Environment configuration (PORT, MONGO_URI)
-├── .env.example              # Sample environment template
 ├── package.json              # Dependencies and run scripts
 ├── seed.js                   # Pre-populates 12 realistic sample products
 ├── server.js                 # Express application entry point
@@ -36,46 +35,58 @@ Assignment-3/
 - **Mongoose** (Object Data Modeling / ODM library)
 - **dotenv** (Environment variable loader)
 
-*(Strictly compliant: No external CMS, UI boilerplates, or unapproved libraries used.)*
+_(Strictly compliant: No external CMS, UI boilerplates, or unapproved libraries used.)_
 
 ---
 
 ## ⚙️ Installation & Setup Instructions
 
 ### 1. Prerequisites
+
 Ensure you have installed:
+
 - **Node.js** (v18+)
 - **MongoDB Community Server** (running locally on port 27017)
 
 To verify MongoDB service is active on Windows:
+
 ```powershell
 Get-Service *mongo*
 ```
 
 ### 2. Install Project Dependencies
+
 Open your terminal in `Assignment-3`:
+
 ```bash
 npm install
 ```
 
 ### 3. Configure Environment Variables
+
 Verify or edit `.env`:
+
 ```env
 PORT=5000
 MONGO_URI=mongodb://127.0.0.1:27017/inventory_db
 ```
 
 ### 4. Seed the Database
+
 Populate 12 sample items matching the assignment PDF screenshots:
+
 ```bash
 npm run seed
 ```
 
 ### 5. Start the Server
+
 ```bash
 npm start
 ```
+
 Console Output:
+
 ```
 Server running in development mode on port 5000
 MongoDB Connected: 127.0.0.1
@@ -88,6 +99,7 @@ MongoDB Connected: 127.0.0.1
 Base URL: `http://localhost:5000/api/products`
 
 ### 1. Get All Products (Pagination, Filtering, Sorting)
+
 - **Method:** `GET`
 - **URL:** `http://localhost:5000/api/products`
 - **Optional Query Parameters:**
@@ -99,6 +111,7 @@ Base URL: `http://localhost:5000/api/products`
   - `sortBy`: Field to sort by (default: `createdAt`)
   - `order`: `asc` or `desc` (default: `desc`)
 - **Example Response:**
+
 ```json
 {
   "total": 12,
@@ -128,10 +141,12 @@ Base URL: `http://localhost:5000/api/products`
 ---
 
 ### 2. Create New Product
+
 - **Method:** `POST`
 - **URL:** `http://localhost:5000/api/products`
 - **Headers:** `Content-Type: application/json`
 - **Request Body:**
+
 ```json
 {
   "name": "Gel Pen Pack of 15",
@@ -143,7 +158,9 @@ Base URL: `http://localhost:5000/api/products`
   "supplier": "Cello Pens"
 }
 ```
+
 - **Response (201 Created):**
+
 ```json
 {
   "name": "Gel Pen Pack of 15",
@@ -165,10 +182,12 @@ Base URL: `http://localhost:5000/api/products`
 ---
 
 ### 3. Get Low-Stock Alert Report
+
 - **Method:** `GET`
 - **URL:** `http://localhost:5000/api/products/low-stock`
 - **Description:** Returns products where `quantity <= reorderLevel`.
 - **Response (200 OK):**
+
 ```json
 {
   "count": 4,
@@ -192,10 +211,12 @@ Base URL: `http://localhost:5000/api/products`
 ---
 
 ### 4. Category-Wise Summary (MongoDB Aggregation)
+
 - **Method:** `GET`
 - **URL:** `http://localhost:5000/api/products/summary`
 - **Description:** Uses `$group` pipeline to compute `totalItems`, `totalQuantity`, `totalStockValue`, and `avgPrice` per category.
 - **Response (200 OK):**
+
 ```json
 {
   "categories": 4,
@@ -221,6 +242,7 @@ Base URL: `http://localhost:5000/api/products`
 ---
 
 ### 5. Get Single Product by ID
+
 - **Method:** `GET`
 - **URL:** `http://localhost:5000/api/products/:id`
 - **Response (200 OK):** Single product JSON document.
@@ -231,10 +253,12 @@ Base URL: `http://localhost:5000/api/products`
 ---
 
 ### 6. Update Product Details
+
 - **Method:** `PUT`
 - **URL:** `http://localhost:5000/api/products/:id`
 - **Headers:** `Content-Type: application/json`
 - **Request Body:**
+
 ```json
 {
   "name": "Gel Pen Pack of 15",
@@ -244,27 +268,34 @@ Base URL: `http://localhost:5000/api/products`
   "quantity": 60
 }
 ```
+
 - **Response (200 OK):** Updated product object with newly calculated `stockValue`.
 
 ---
 
 ### 7. Adjust Stock Level (Increment / Decrement)
+
 - **Method:** `PATCH`
 - **URL:** `http://localhost:5000/api/products/:id/stock`
 - **Headers:** `Content-Type: application/json`
 - **Restock Example Body (+10):**
+
 ```json
 {
   "change": 10
 }
 ```
+
 - **Sale / Decrement Example Body (-5):**
+
 ```json
 {
   "change": -5
 }
 ```
+
 - **Response (200 OK):**
+
 ```json
 {
   "message": "Stock updated",
@@ -276,38 +307,20 @@ Base URL: `http://localhost:5000/api/products`
   }
 }
 ```
+
 - **Safe Guard:** If `quantity + change < 0`, returns **400 Bad Request** preventing negative inventory.
 
 ---
 
 ### 8. Delete Product
+
 - **Method:** `DELETE`
 - **URL:** `http://localhost:5000/api/products/:id`
 - **Response (200 OK):**
+
 ```json
 {
   "message": "Product deleted",
   "id": "6a547727f6123427d6e61d7c"
 }
 ```
-
----
-
-## 🎓 Viva & Exam Explanations (How to Explain During Practicals)
-
-1. **How Route Conflicts were avoided:**
-   In Express, route paths are evaluated in order. If `/:id` were registered before `/low-stock` or `/summary`, Express would treat `"low-stock"` or `"summary"` as the `:id` parameter. We solved this by registering specific routes `/low-stock` and `/summary` **before** parameterized route `/:id`.
-
-2. **How `stockValue` is computed:**
-   It is implemented as a **Mongoose Virtual property** (`this.price * this.quantity`). It is not stored redundantly in the database, reducing storage and eliminating synchronization bugs. Enabled in JSON responses using `{ toJSON: { virtuals: true } }`.
-
-3. **How the Inventory Summary works:**
-   Uses the **MongoDB Aggregation Pipeline** with `$group`:
-   - `$sum: 1` counts total items.
-   - `$sum: "$quantity"` sums stock quantities.
-   - `$sum: { $multiply: ["$price", "$quantity"] }` calculates total category inventory value.
-   - `$avg: "$price"` computes the average price.
-
-4. **Centralized Error Handling:**
-   All errors from controllers are passed to `next(error)`. The centralized middleware catches Mongoose `ValidationError`, `CastError` (invalid ID), and code `11000` (duplicate SKU), formatting human-readable JSON responses.
-
