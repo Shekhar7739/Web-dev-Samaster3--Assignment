@@ -1,0 +1,26 @@
+{
+  "name": "inventory-and-data-management-system",
+  "version": "1.0.0",
+  "description": "Assignment 3 - Inventory and Data Management System using Node.js, Express, MongoDB, and Mongoose",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js"
+  },
+  "keywords": [
+    "inventory",
+    "express",
+    "mongodb",
+    "mongoose",
+    "crud",
+    "aggregation"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^4.22.3",
+    "mongoose": "^8.24.8"
+  },
+  "type": "commonjs"
+}
